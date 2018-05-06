@@ -1,0 +1,5 @@
+bin
+pkg
+src/*
+!src/maid77bot
+config.yaml

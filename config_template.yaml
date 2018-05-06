@@ -1,0 +1,5 @@
+dialog_priority:
+  nya: 800
+  default: 1000
+socks5_proxy: localhost:1080
+telegram_token: <your-telegram-token>
