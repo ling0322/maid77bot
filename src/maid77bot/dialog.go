@@ -14,19 +14,19 @@ const (
 	ConfidenceVeryLow  = 1
 )
 
-// ClassifyResult is the result for Classify function in Dialog
+// ClassifyResult is the result of Classification in Dialog
 type ClassifyResult struct {
-	// The level of confidence like ConfidenceVeryHigh, ConfidenceLow, ...
+	// The level of confidence, like ConfidenceVeryHigh, ConfidenceLow, ...
 	Confidence int
 
-	// Score of the confidence in float
+	// Score of the confidence
 	ConfidenceValue float64
 
-	// Some intermediate result of classifier
+	// Some intermediate results from classifier
 	Bundle map[string]interface{}
 }
 
-// Dialog is the interface to handle the user message and generate reply for it
+// Dialog is the interface to classify and reply user messages
 type Dialog interface {
 	// Classify predicts the confidence that the message belongs to this Dialog
 	Classify(*UserMessage, context.Context) *ClassifyResult
@@ -35,10 +35,10 @@ type Dialog interface {
 	Reply(*UserMessage, *ClassifyResult, context.Context) (*ReplyMessage, error)
 }
 
-// Controller of each dialog module. It will creates each dialog module
-// according to config. And send message to each dialog then choose the
-// most confident dialog this message belongs to. Then get answer from this
-// choosen dialog
+// Controller of each dialog module. It will create instances of each dialog
+// according to the config. When user message arrives, it will call Classify()
+// method of each dialog instance to choose the most related one. Then get the
+// reply from it
 type DialogController struct {
 	botConfig  *Config
 	dialogs    map[string]Dialog
@@ -92,8 +92,8 @@ func createDialogByName(name string, botConfig *Config) (Dialog, error) {
 	}
 }
 
-// classify runs the Classify method from all dialogs and return as a map from
-// dialog name to *ClassifyResult
+// classify calls the Classify method of all dialog instances. And return the
+// result as a map from dialog name to *ClassifyResult
 func (c *DialogController) classify(
 	m *UserMessage,
 	ctx context.Context) (map[string]*ClassifyResult, error) {
@@ -152,8 +152,8 @@ func (c *DialogController) rankDialog(res map[string]*ClassifyResult) string {
 	return maxDialog
 }
 
-// Reply replies the user message using most confident dialog it belongs to. And
-// update session state for this dialog
+// Reply replies the user message using the most confident dialog it belongs to.
+// And updates session state for this dialog
 func (c *DialogController) Reply(
 	m *UserMessage,
 	ctx context.Context) (*ReplyMessage, error) {
